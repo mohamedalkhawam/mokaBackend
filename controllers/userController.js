@@ -2,6 +2,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const User = require("../models/userModel");
 const factory = require("./handlerFactory");
+const jwt = require("jsonwebtoken");
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
   Object.keys(obj).forEach((el) => {
@@ -35,10 +36,20 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     data: updatedUser,
   });
 });
-exports.getMe = (req, res, next) => {
-  req.params.id = req.user.id;
-  next();
-};
+exports.getMe = catchAsync(async (req, res, next) => {
+  // req.params.id = req.user.id;
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError("No document found with that ID", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    result: 1,
+    data: user,
+    token: req.headers.token || req.headers.authorization.split(" ")[1],
+    requestTime: req.requestTime,
+  });
+});
 exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
   res.status(204).json({ status: "success", data: null });

@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
 const userController = require("../controllers/userController");
+
 router.use(authController.protect);
 router.patch("/updatePassword", authController.updatePassword);
-router.get("/loadUser", userController.getMe, userController.getOneUser);
+router.get("/loadUser", userController.getMe);
 router.patch("/me", userController.updateMe);
 router.delete("/me", userController.deleteMe);
-router.use(authController.restrictTo("admin"));
+router.use(authController.restrictTo("super"));
 router
   .route("/")
   .get(userController.getAllUsers)
